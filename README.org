@@ -1,0 +1,14 @@
+#+title: Advent of Learning Code
+#+author: Garid Z.
+#+date: [2022-12-03 Sat 22:55]
+* Advent of Learning Code
+I try to learn new programming language by solving problems provided from [[https://adventofcode.com/][Advent of Code]].
+I've only started from 2022 with [[https://go.dev/][Go Language]]. So far good
+
+_Under-score_ means I've solved that day's problem.
+** TODO Year 2022, [[https://go.dev/][Go Language]]:
+| _day1_ | day6  | day11 | day16 | day21 | day26 | day31 |
+| _day2_ | day7  | day12 | day17 | day22 | day27 |       |
+| _day3_ | day8  | day13 | day18 | day23 | day28 |       |
+| day4 | day9  | day14 | day19 | day24 | day29 |       |
+| day5 | day10 | day15 | day20 | day25 | day30 |       |

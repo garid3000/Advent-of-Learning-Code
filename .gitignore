@@ -4,3 +4,5 @@
 *.txt
 /day1/day1.org
 /day1/go.mod
+/README.pdf
+*.tex
