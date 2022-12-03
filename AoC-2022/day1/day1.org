@@ -1,0 +1,17 @@
+:PROPERTIES:
+:ID:       e7d8d775-a489-4f6a-ab50-07fbaaa89e48
+:END:
+#+title: c-framebuffer-writter
+#+author: Garid Z.
+#+date: [2022-12-02 Fri 17:45]
+#+property: header-args :tangle /tmp/tmp.py
+#+auto_tangle: nil
+
+* Data input:
+#+begin_src shell
+wget https://adventofcode.com/2022/day/1/input
+#+end_src
+
+#+RESULTS:
+
+* 
