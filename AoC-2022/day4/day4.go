@@ -59,6 +59,7 @@ func parser(line string) [4]int{
 	//	i, _n, elf1_s, elf1_e, elf2_s, elf2_e, sum)
 }
 
+
 func part1_2(){
 	fmt.Printf("This is day4\n");
 	fname := "/home/garid/Documents/advent/AoC-2022/day4/input.txt"
@@ -98,7 +99,64 @@ func part1_2(){
 	}
 }
 
+
+
+
+
+func part1_2_Sscanf(){
+	fmt.Printf("This is day4\n");
+	fname := "/home/garid/Documents/advent/AoC-2022/day4/input.txt"
+	file, err := os.Open(fname)
+	if err != nil{
+		fmt.Printf("file %s is not found\n", fname);
+		panic(2)
+	}
+
+	reader := bufio.NewReader(file)
+	//read by each linea
+
+	var elf1_s, elf1_e, elf2_s, elf2_e int;
+	for i, fullcontain,overlap:=0,0,0 ;;i++{
+		line, ret := reader.ReadString('\n')
+		//fmt.Printf("%d %s", i, line, )
+		//n, ret := fmt.Fscanln(reader, "%d-%d,%d-%d\n",
+		//	&elf1_s, &elf1_e, &elf2_s, &elf2_e)
+		n, ret := fmt.Sscanf(line, "%d-%d,%d-%d\n",
+			&elf1_s, &elf1_e, &elf2_s, &elf2_e)
+		fmt.Printf("%d, %d-%d,%d-%d, %d\t\n", i,
+			elf1_s, elf1_e, elf2_s, elf2_e, n)
+		
+		if ret == io.EOF{
+			fmt.Printf("File has ended  \n")
+			fmt.Printf("Full contain: %d \n", fullcontain)
+			fmt.Printf("Overlap %d \n", overlap)
+			return 
+		}
+		//elf1se2se := parser(line);
+
+		if isfulloverlap(
+			elf1_s,
+			elf1_e,
+			elf2_s,
+			elf2_e){
+			fullcontain++;
+		}
+		if isoverlap(
+			elf1_s,
+			elf1_e,
+			elf2_s,
+			elf2_e){
+			overlap++;
+		}
+	}
+}
+
+
+
+
+
 func main(){
-	part1_2();
+	//part1_2();  My own implementation of extracting values from string
+	part1_2_Sscanf();
 }
 
