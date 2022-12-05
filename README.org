@@ -3,12 +3,12 @@
 #+date: [2022-12-03 Sat 22:55]
 * Advent of Learning Code
 I try to learn new programming language by solving problems provided from [[https://adventofcode.com/][Advent of Code]].
-I've only started from 2022 with [[https://go.dev/][Go Language]]. So far good
+I've only started from 2022 with [[https://go.dev/][Go Language]]. So far so good
 
 ~*~ means I've solved that day's problem.
 ** TODO Year 2022, [[https://go.dev/][Go Language]]:
-| day1 * | day6  | day11 | day16 | day21 | day26 | day31 |
-| day2 * | day7  | day12 | day17 | day22 | day27 |       |
-| day3 * | day8  | day13 | day18 | day23 | day28 |       |
-| day4 * | day9  | day14 | day19 | day24 | day29 |       |
-| day5 * | day10 | day15 | day20 | day25 | day30 |       |
+| day1 * | day6  | day11 | day16 | day21 |
+| day2 * | day7  | day12 | day17 | day22 |
+| day3 * | day8  | day13 | day18 | day23 |
+| day4 * | day9  | day14 | day19 | day24 |
+| day5 * | day10 | day15 | day20 | day25 |
