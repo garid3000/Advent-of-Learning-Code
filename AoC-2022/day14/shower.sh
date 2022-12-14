@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in {1..27625..20}
+for i in {0..27625..20}
 do
 	tput cup 0 0
 	cat "grid/$i"
