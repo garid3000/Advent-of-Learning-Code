@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
+
+	//"strconv"
 
 	//"strconv"
 	//"log"
 	"strings"
+
+	//"gopkg.in/ini.v1"
 )
 
 
@@ -22,15 +25,15 @@ var (
     x_min =  9999
 	y_max = -9999
 	y_min =  9999
-	grid = [200][200]int{}
-	x_offset = 400
+	grid = [200][1000]int{}
+	x_offset = 0
 	y_offset = 0
 )
 
 func print_grid(fname string){
 	tmpstr := ""
 	for yy:=0; yy<200; yy++{
-		for xx:=0; xx<200; xx++{
+		for xx:=0; xx<1000; xx++{
 			if grid[yy][xx] == 1{
 				tmpstr += "#"
 				//fmt.Printf("#")
@@ -106,9 +109,8 @@ func path_parser(pathstr string) {
 	}
 }
 
-//thissand := Coord{y:0, x:100} //500,0 , xoffset -100, so x=100
-func movesand(sand_pos Coord) Coord{
-	if sand_pos.y >= 199 {panic(420)} // sand went to abyss
+func movesand(sand_pos Coord) (Coord, bool){
+	if sand_pos.y >= 199 {return sand_pos, true; panic(420)} // sand went to abyss
 
 
 	//move the sand
@@ -137,15 +139,26 @@ func movesand(sand_pos Coord) Coord{
 		return movesand(newPos)
 	}
 
-	return sand_pos
+	return sand_pos, false
 }
 
 func put_sands(){
-	initialsandpos := Coord{y:0, x:100} //500,0 , xoffset -100, so x=100
+	initialsandpos := Coord{y:0, x:500} //500,0 , xoffset -100, so x=100
 	for i:=1;;i++ {
-		end_sand_pos := movesand(initialsandpos)
-		grid[end_sand_pos.y][end_sand_pos.x] = 2
-		print_grid("grid/"+strconv.Itoa(i))
+		end_sand_pos, ret := movesand(initialsandpos)
+		if ret == false {
+			grid[end_sand_pos.y][end_sand_pos.x] = 2
+			//print_grid("grid/"+strconv.Itoa(i))
+		} else {
+			fmt.Printf("abyss %d\n", i-1)
+			break
+		}
+
+		if end_sand_pos.x == initialsandpos.x &&  end_sand_pos.y == initialsandpos.y {
+			fmt.Printf("Full %d\n", i)
+			break
+		}
+
 	}
 
 }
@@ -175,13 +188,20 @@ func main() {
 		path_parser(line)
 	}
 	print_grid("grid/0")
-	put_sands()
+	//put_sands()
 	
 	fmt.Printf("count: %v\n", count) // this is part1
-	//fmt.Printf("y_max %v\n", y_max) // this is part1
-	//fmt.Printf("y_min %v\n", y_min) // this is part1
-	//fmt.Printf("x_max %v\n", x_max) // this is part1
-	//fmt.Printf("x_min %v\n", x_min) // this is part1
+	fmt.Printf("y_max %v\n", y_max) // this is part1
+	fmt.Printf("y_min %v\n", y_min) // this is part1
+	fmt.Printf("x_max %v\n", x_max) // this is part1
+	fmt.Printf("x_min %v\n", x_min) // this is part1
 
+
+	//putting the horizontal
+
+	for xx:=0; xx < 1000; xx++ {
+		grid[y_max + 2][xx] = 1
+	}
+	put_sands()
 
 }
