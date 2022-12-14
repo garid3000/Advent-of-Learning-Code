@@ -236,7 +236,7 @@ func split_list(alist string) ([]string, int){
 
 func compare2str(a, b string, tab_depth int) int {//a,b are value {num, or list}
 	// i need give -1 not correct, +1 correct 0 for equal
-	fmt.Printf("%v- Compare %v vs %v\n", get_n_tabs(tab_depth), a, b)
+	//fmt.Printf("%v- Compare %v vs %v\n", get_n_tabs(tab_depth), a, b)
 	var is_a_num, is_b_num bool
 	va, ea := strconv.Atoi(a)
 	vb, eb := strconv.Atoi(b)
@@ -244,14 +244,14 @@ func compare2str(a, b string, tab_depth int) int {//a,b are value {num, or list}
 	if (eb == nil) {is_b_num = true}
 
 	if is_a_num && is_b_num { // both are numbers //case1 
-		//fmt.Printf("\t\t%v<=%v %v\n", va, vb, va <= vb)
+		////fmt.Printf("\t\t%v<=%v %v\n", va, vb, va <= vb)
 		if va == vb {
 			return 0
 		}else if va < vb {
-			fmt.Printf("%v- Left side is smaller, so inputs are in the right order\n", get_n_tabs(tab_depth+1))
+			//fmt.Printf("%v- Left side is smaller, so inputs are in the right order\n", get_n_tabs(tab_depth+1))
 			return 1
 		}else{
-			fmt.Printf("%v- Right side is smaller, so inputs are not in the right order\n", get_n_tabs(tab_depth+1))
+			//fmt.Printf("%v- Right side is smaller, so inputs are not in the right order\n", get_n_tabs(tab_depth+1))
 			return -1
 		}
 	} else if (!is_a_num) && (!is_b_num) { //both are list
@@ -261,38 +261,67 @@ func compare2str(a, b string, tab_depth int) int {//a,b are value {num, or list}
 		for i:=0; i<min(a_element_size, b_element_size); i++{
 			tmpret:= compare2str(a_elements[i], b_elements[i], tab_depth + 1)
 			if tmpret != 0 {
-				// fmt.Printf("returning %v\n", tmpret)
+				// //fmt.Printf("returning %v\n", tmpret)
 				return tmpret
 			} // remaining lists are irrelavant apperantly
 		}
 
 		if (a_element_size > b_element_size) { // right must have longer values
-			fmt.Printf("%v- Right side ran out of items, so inputs are not in the right order\n",
-				get_n_tabs(tab_depth+1))
+			//fmt.Printf("%v- Right side ran out of items, so inputs are not in the right order\n",get_n_tabs(tab_depth+1))
 			return -1 //
 		} else if (a_element_size < b_element_size) {
-			fmt.Printf("%v- Left side ran out of items, so inputs are in the right order\n",
-				get_n_tabs(tab_depth+1))
+			//fmt.Printf("%v- Left side ran out of items, so inputs are in the right order\n",	get_n_tabs(tab_depth+1))
 			return 1
 		} 
 		return 0
 	} else if (is_a_num) && (!is_b_num) { // a is num, b is list
 		//make a: num -> list conversion
 		newa := "[" + a + "]"
-		fmt.Printf("%s- Mixed types; convert left to %s and retry comparison\n", get_n_tabs(tab_depth+1), newa)
+		//fmt.Printf("%s- Mixed types; convert left to %s and retry comparison\n", get_n_tabs(tab_depth+1), newa)
 		tmpret := compare2str(newa, b, tab_depth + 1)
 		if tmpret != 0 {return tmpret} // remaining lists are irrelavant apperantly
 	} else if (!is_a_num) && (is_b_num) { // a is list, b is num
 		//make b: num -> list conversion
 		newb := "[" + b + "]"
-		fmt.Printf("%s- Mixed types; convert right to %s and retry comparison\n", get_n_tabs(tab_depth+1), newb)
+		//fmt.Printf("%s- Mixed types; convert right to %s and retry comparison\n", get_n_tabs(tab_depth+1), newb)
 		tmpret := compare2str(a, newb, tab_depth + 1)
 		if tmpret != 0 {return tmpret} // remaining lists are irrelavant apperantly
 	}
 	return 0
 }
 
+var packets []string;
 
+func print_all_packets () {
+	for i:=0; i<len(packets); i++ {
+		fmt.Printf("%d\t%s\n", i, packets[i])
+	}
+}
+
+func get_index_in_packets(search string) int {
+	for i:=0; i<len(packets); i++ {
+		if packets[i] == search {
+			return i
+		}
+	}
+	panic(999)
+}
+
+
+
+func buble_sort(){
+	// sorts packets variable
+	size_of_packets := len(packets)
+	for i:=0; i<size_of_packets-1; i++ {
+		for j:=0; j<size_of_packets - i - 1; j++{
+			//fmt.Printf("%d %d %d\n", size_of_packets, i, j)
+			if compare2str(packets[j], packets[j+1], 0) < 0{
+				packets[j], packets[j+1] = packets[j+1], packets[j]
+			}
+		}
+	}
+	
+}
 																				  
 
 func main() {
@@ -316,6 +345,8 @@ func main() {
 
 		line1 = line1[:len(line1)-1]
 		line2 = line2[:len(line2)-1]
+		packets = append(packets, line1)
+		packets = append(packets, line2)
 
 		
 		fmt.Printf("== Pair %v ==\n", i + 1)
@@ -338,5 +369,23 @@ func main() {
 
 
 	fmt.Printf("sum: %v\n", sum) // this is part1
-	fmt.Printf("right: %v\n", rightorderindex) // this is part1
+
+
+	//part2 additional2 paackets
+	packets = append(packets, "[[2]]")
+	packets = append(packets, "[[6]]")
+	//fmt.Printf("packets %v %v\n", len(packets), packets )
+	//print_all_packets()
+	//fmt.Printf("right: %v\n", rightorderindex) // this is part1
+	buble_sort()
+
+	//print_all_packets()
+	//fmt.Printf("packets %v\n", packets)
+
+    indexof_2 := get_index_in_packets("[[2]]") + 1
+    indexof_6 := get_index_in_packets("[[6]]") + 1
+
+	fmt.Printf("%d\n", indexof_2)	
+	fmt.Printf("%d\n", indexof_6)	
+	fmt.Printf("product: %d\n", indexof_6 * indexof_2)	
 }
