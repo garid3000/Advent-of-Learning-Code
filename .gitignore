@@ -8,3 +8,4 @@
 *.tex
 /AoC-2022/day1/go.mod
 /AoC-2022/day12/*.csv
+/AoC-2022/day14/grid/*

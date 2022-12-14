@@ -8,7 +8,7 @@ import (
 
 	//"strconv"
 
-	//"strconv"
+	"strconv"
 	//"log"
 	"strings"
 
@@ -29,6 +29,30 @@ var (
 	x_offset = 0
 	y_offset = 0
 )
+
+func write2file(fname string) {
+    f, err := os.Create(fname)
+	if err != nil { panic(123) }
+	tmprow := [501]byte{}
+	tmprow[500] = '\n'
+	
+	for yy:=0; yy<175; yy++{
+		for xx:=250; xx<750; xx++{
+			switch (grid[yy][xx]) {
+			case 1:
+				tmprow[xx-250] = '#'
+			case 0:
+				tmprow[xx-250] = '.'
+			case 2:
+				tmprow[xx-250] = 'o'
+			default:
+				panic(123)
+			}
+		}
+		_, err := f.WriteString(string(tmprow[:]))
+		if err != nil { panic(1234)}
+	}
+}
 
 func print_grid(fname string){
 	tmpstr := ""
@@ -110,7 +134,7 @@ func path_parser(pathstr string) {
 }
 
 func movesand(sand_pos Coord) (Coord, bool){
-	if sand_pos.y >= 199 {return sand_pos, true; panic(420)} // sand went to abyss
+	if sand_pos.y >= 199 {return sand_pos, true;} // panic(420)} // sand went to abyss
 
 
 	//move the sand
@@ -149,6 +173,7 @@ func put_sands(){
 		if ret == false {
 			grid[end_sand_pos.y][end_sand_pos.x] = 2
 			//print_grid("grid/"+strconv.Itoa(i))
+			write2file("grid/"+strconv.Itoa(i))
 		} else {
 			fmt.Printf("abyss %d\n", i-1)
 			break
