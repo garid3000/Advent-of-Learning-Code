@@ -11,8 +11,10 @@ import (
 )
 
 var (
-	grid          = [2022*4][7]byte{} // 
+	//grid          = [2022*4][7]byte{} // 
+	grid          = [50460*4][7]byte{} // 
 	max_columns   = [7]int{}
+	//asf           = [1000000000000 * 3] [7] byte {}
 )
 
 
@@ -28,7 +30,7 @@ func min_max() (int,int) {
 
 
 func set_grid(){
-	for i:=0; i<8088; i++ {
+	for i:=0; i<50460*4; i++ {
 		for j:=0; j<7; j++ {
 			grid[i][j] = '.'
 		}
@@ -147,7 +149,7 @@ func is_dropping_rock_on_wall(sideofwall int) bool {
 	end_lower_height, start_higher_height := min_max()
 	end_lower_height = 0
 	start_higher_height += 10
-	if start_higher_height > 8088 {start_higher_height = 8088}
+	//if start_higher_height > 8088 {start_higher_height = 8088}
 	if end_lower_height    < 0 {end_lower_height = 0}
 
 	state := false
@@ -179,7 +181,7 @@ func moveSide(dir byte){
 	end_lower_height = 0
 	//start_higher_height := initial_height + 10
 	//end_lower_height    := initial_height - 10
-	if start_higher_height > 8088 {start_higher_height = 8088}
+	//if start_higher_height > 8088 {start_higher_height = 8088}
 	//if end_lower_height    < 0    {end_lower_height = 0}
 
 	if dir == '>' {
@@ -370,21 +372,22 @@ func main() {
 	}
 	
 	//for j:=0;j<2022;j++{
+	_, M := min_max()
 	for j:=0;j<2022;j++{
+		_, M = min_max()
 		insert_shape12345(j) 
-		_, M := min_max()
-		draw_grid(M+10, M-30, "insert new")
+		// draw_grid(M+10, M-30, "insert new")
 
 		dir := readCommand()
 		moveSide(dir)
-		draw_grid(M+10, M-30, "moved     " + string(dir) + strconv.Itoa(i_command_cursor-1))
+		// draw_grid(M+10, M-30, "moved     " + string(dir) + strconv.Itoa(i_command_cursor-1))
 
 		for ;; {
 			ret := moveDown()
-			draw_grid(M+10, M-30, "down      j=" + strconv.Itoa(j))
-			// if j > 1660 {
-			// 	time.Sleep(time.Millisecond * 1000)
-			// }
+			draw_grid(M+10, M-30, "down      j=" + strconv.Itoa(j) + "\t=" + strconv.Itoa(i_command_cursor))
+			//if i_command_cursor > 30000 {
+			//	time.Sleep(time.Millisecond * 1000)
+			//}
 
 			if ret  {
 				break
@@ -392,14 +395,15 @@ func main() {
 
 			dir = readCommand()
 			moveSide(dir)
-			draw_grid(M+10, M-30, "moved     " + string(dir)+ strconv.Itoa(i_command_cursor-1) + "j=" + strconv.Itoa(j))
-			//if j > 1660 {
+			 draw_grid(M+10, M-30, "moved     " + string(dir)+ strconv.Itoa(i_command_cursor-1) + "j=" + strconv.Itoa(j))
+			//if i_command_cursor > 30000 {
 			//	time.Sleep(time.Millisecond * 1000)
 			//}
 		}
 		
-		fmt.Printf("Placed %v\n", j)
+		//fmt.Printf("Placed %v\n", j)
 	}
+	draw_grid(M+10, M-30, "last     ")
 	//m,M := min_max()
 	//fmt.Printf("max: %v %v\n", m, M )
 
