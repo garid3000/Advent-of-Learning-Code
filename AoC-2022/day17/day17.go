@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 	"strconv"
-	// "time"
+	"time"
 	//"strings"
 )
 
@@ -14,6 +14,7 @@ var (
 	//grid          = [2022*4][7]byte{} // 
 	grid          = [50460*4][7]byte{} // 
 	max_columns   = [7]int{}
+	overall_shift = 0
 	//asf           = [1000000000000 * 3] [7] byte {}
 )
 
@@ -63,6 +64,7 @@ func set_grid(){
 //}
 
 func draw_grid(from_higher, to_lower int, label string) {
+	//return
 	fmt.Print("\033[2J") //Clear screen
 	fmt.Printf("\033[%d;%dH", 0, 0) // Set cursor position
 
@@ -238,15 +240,14 @@ func moveSide(dir byte){
 		return
 
 
-
-
-
 	} else {
 		fmt.Printf("unknown dir char: %c\n", dir)
 		panic(1)
 	}
 
 }
+
+
 
 
 func moveDown() bool{ // returns if the rock has froze
@@ -315,17 +316,95 @@ func freeze_movable_rock(){
 var i_command_cursor =0
 var commands = ""
 
-func readCommand() byte {
+func readCommand(x int) byte {
+	if i_command_cursor == 0 {
+		_, M  := min_max()
+		draw_grid(M+10, M-30, "after shift" + strconv.Itoa(overall_shift) + "\t\t===\t" + strconv.Itoa(x))
+		time.Sleep(time.Millisecond * 5000)
+	}
 	//if i_command_cursor == len(commands)  {
 	//fmt.Printf("Panic")
 	//panic(0)
 	//}
-	tmp := commands[i_command_cursor % len(commands)]
+	tmp := commands[i_command_cursor]
 	//tmp = '<'
 	i_command_cursor++ 
+    i_command_cursor = i_command_cursor % len(commands)
 	return tmp
 }
 
+
+func shiftablelevel_old() (int, bool){
+	end_lower_height, start_higher_height := min_max()
+	start_higher_height = start_higher_height + 10
+	touchedleftwall := false;
+	touchedrightwall := false;
+	for h:=start_higher_height; h>=end_lower_height; h--{
+		if grid[h][0] == '#'{
+			touchedleftwall = true
+		}
+		if grid[h][6] == '#' {
+			touchedrightwall = true
+		}
+		if touchedleftwall && touchedrightwall {
+			return h, true
+		}
+	}
+	return 0, false
+}
+
+func shiftablelevel() (int, bool){
+	end_lower_height, start_higher_height := min_max()
+	start_higher_height = start_higher_height + 10
+	var register byte 
+	for h:=start_higher_height; h>=end_lower_height; h--{
+		for c:=0; c<7; c++ {
+			if grid[h][c] == '#'{
+				register |= (1 << c)
+			}
+		}
+		if register == 0b01111111 {
+			//fmt.Printf("---%v %v\n", h, register)
+			return h, true
+		}
+		// if grid[h][0] == '#'{
+		// 	touchedleftwall = true
+		// }
+		// if grid[h][6] == '#' {
+		// 	touchedrightwall = true
+		// }
+		// if touchedleftwall && touchedrightwall {
+		// 	return h, true
+		// }
+	}
+	return 0, false
+}
+
+
+func shift_the_grid(){
+	val, shiftable := shiftablelevel()
+	if shiftable{ //shift val
+		_, start_higher_height := min_max()
+		start_higher_height = start_higher_height + 10
+		for h:=0; h<(start_higher_height - val); h++ {
+			for c:=0; c<7; c++{
+				grid[h][c] = grid[h+val][c]
+				grid[h+val][c] = '.'
+			}
+		}
+		for h:=start_higher_height - val -1; h<start_higher_height; h++{
+			for c:=0; c<7; c++{
+				grid[h][c] = '.'
+			}
+		}
+
+		overall_shift += val
+
+		for i:=0; i<7; i++ {
+			max_columns[i] -= val
+		}
+	}
+}
 
 func insert_shape12345(j int) {
 	switch j%5 {
@@ -373,38 +452,39 @@ func main() {
 	
 	//for j:=0;j<2022;j++{
 	_, M := min_max()
-	for j:=0;j<2022;j++{
+	//for j:=0;j<2022;j++{
+	for j:=0;j<15 + 1715;j++{
 		_, M = min_max()
 		insert_shape12345(j) 
 		// draw_grid(M+10, M-30, "insert new")
 
-		dir := readCommand()
+		dir := readCommand(j)
 		moveSide(dir)
 		// draw_grid(M+10, M-30, "moved     " + string(dir) + strconv.Itoa(i_command_cursor-1))
 
 		for ;; {
 			ret := moveDown()
-			draw_grid(M+10, M-30, "down      j=" + strconv.Itoa(j) + "\t=" + strconv.Itoa(i_command_cursor))
-			//if i_command_cursor > 30000 {
-			//	time.Sleep(time.Millisecond * 1000)
-			//}
+			// draw_grid(M+10, M-30, "down      j=" + strconv.Itoa(j) + "\t=" + strconv.Itoa(i_command_cursor))
 
 			if ret  {
 				break
 			}
 
-			dir = readCommand()
+			dir = readCommand(j)
 			moveSide(dir)
-			 draw_grid(M+10, M-30, "moved     " + string(dir)+ strconv.Itoa(i_command_cursor-1) + "j=" + strconv.Itoa(j))
-			//if i_command_cursor > 30000 {
-			//	time.Sleep(time.Millisecond * 1000)
-			//}
+			// draw_grid(M+10, M-30, "moved     " + string(dir)+ strconv.Itoa(i_command_cursor-1) + "j=" + strconv.Itoa(j))
 		}
-		
-		//fmt.Printf("Placed %v\n", j)
 	}
 	draw_grid(M+10, M-30, "last     ")
 	//m,M := min_max()
 	//fmt.Printf("max: %v %v\n", m, M )
+	x, y := shiftablelevel()
 
+	time.Sleep(time.Millisecond * 1000)
+
+	//shift_the_grid()
+	m, M := min_max()
+	draw_grid(M+30, M-30, "moved     ")
+	fmt.Printf("m M:%d %d\n", m, M)
+	fmt.Printf("%v %v\noverall%d\n", x, y, overall_shift + M )
 }
