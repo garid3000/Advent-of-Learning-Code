@@ -46,12 +46,12 @@ func production(mycurrentstate mystate) mystate{
 func available_branches(mycurrentstate mystate, mycurrentbp blueprint) [5]int {
 	//0means nothing, 1means orebot, 2 means clay, 3 means obs, 4 means geode
 	tmp:= [5]int{1, 0, 0, 0, 0}
+	if (mycurrentstate.produced_ore  >= mycurrentbp.geod_bot_ore_cost) &&
+	   (mycurrentstate.produced_obsi >= mycurrentbp.geod_bot_obs_cost) {tmp[4]=1; return tmp}
 	if  mycurrentstate.produced_ore  >= mycurrentbp.ore__bot_ore_cost {tmp[1]=1}
 	if  mycurrentstate.produced_ore  >= mycurrentbp.clay_bot_ore_cost {tmp[2]=1}
 	if (mycurrentstate.produced_ore  >= mycurrentbp.obs_bot_ore__cost) &&
 	   (mycurrentstate.produced_clay >= mycurrentbp.obs_bot_clay_cost) {tmp[3]=1}
-	if (mycurrentstate.produced_ore  >= mycurrentbp.geod_bot_ore_cost) &&
-	   (mycurrentstate.produced_obsi >= mycurrentbp.geod_bot_obs_cost) {tmp[4]=1}
 	
 	return tmp
 }
@@ -121,6 +121,9 @@ func explore(bp blueprint, curstate mystate, cur_time, max_time int) {
 		}
 		return //curstate
 	}
+	if (max_time - cur_time) * (max_time - cur_time) / 2 + (max_time - cur_time) + curstate.produced_goed < max_produced_geod {
+		return
+	}
 	//else check the all possible variables
 	mycurent_available_branches := available_branches(curstate, bp)
 	// for i, val := range mycurent_available_branches {
@@ -182,10 +185,9 @@ func main() {
 	fmt.Printf("%v\n", blueprints)
 	fmt.Println("Now for the finding out each max amount obs production")
 	maxes := make([]int, len(blueprints), len(blueprints))
-	for i:=0; i<len(blueprints); i++ {
-		maxes[i] = max_production(blueprints[i], 24)
+	for i:=1; i<len(blueprints); i++ {
+		maxes[i] = max_production(blueprints[i], 25)
 		fmt.Printf("Max Production: %v\n", maxes[i])
 		break
 	}
-	
 }
