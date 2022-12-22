@@ -1,0 +1,3 @@
+[garid@e590 ~d/advent/AoC-2022/day22]$ go run day22.go | tail --lines 1 | sed -e 's/ //g' | sed  -e 's/\[//g' | sed -e 's/\]//g' > out
+[garid@e590 ~d/advent/AoC-2022/day22]$ tail --lines 1 input.txt > out1
+[garid@e590 ~d/advent/AoC-2022/day22]$ diff out out1
