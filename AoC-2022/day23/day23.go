@@ -110,7 +110,7 @@ func consider_new_pos(ith int) {
 	elves[ith].new = elves[ith].pos
 }
 
-func move_2_new(ith int){
+func move_2_new(ith int) int {
 	count := 0
 	// count the number of other elves who consider same new position with i-th elf
 	for i:=0; i<num_elves; i++{
@@ -122,33 +122,45 @@ func move_2_new(ith int){
 	}
 
 	if count > 0{
-		return // nothing if others considered same new postion
+		return 1// nothing if others considered same new postion
+		//1 means not moved
+	}
+	if elves[ith].pos == elves[ith].new {
+		return 1
+		//1 means not moved
 	}
 
 	elves[ith].pos = elves[ith].new //move
+	return 0
+	//0 means moved
 }
 
 
-func execute_1_round(){
+func execute_1_round() bool {
 	// 1st half of step
 	for i:=0; i<num_elves; i++{
 		consider_new_pos(i)
 	}
 	//2nd half of step
+	sum := 0
 	for i:=0; i<num_elves; i++{
-		move_2_new(i)
+		sum += move_2_new(i)
 	}
 	round++;
+
+	return sum == num_elves
 }
 
 
-func printing() {
-	fmt.Printf("\033[2J\033[0;0H---round:%d----", round); // clear screen
-	for i:=0; i<num_elves; i++{
-		fmt.Printf("\033[%d;%dH#", elves[i].pos.y+20, elves[i].pos.x+20)
-	}
+func printing(shouldIprint bool) {
+	if shouldIprint {
+		fmt.Printf("\033[2J\033[0;0H---round:%d----", round); // clear screen
+		for i:=0; i<num_elves; i++{
+			fmt.Printf("\033[%d;%dH#", elves[i].pos.y+24, elves[i].pos.x+40)
+		}
 
-	time.Sleep(time.Millisecond * 1000)
+		time.Sleep(time.Millisecond * 1)
+	}
 }
 
 func main() {
@@ -181,11 +193,15 @@ func main() {
 	num_elves = len(elves)
 	// fmt.Printf("%v %v\n", elves, len(elves))
 
-	printing()
-	for i:=0; i<10; i++ {
-		execute_1_round()
-		printing()
+	printing(true)
+	for i:=0;; i++ {
+		if execute_1_round() {
+			break
+		}
+		printing(true)
+		fmt.Printf("\n%d\n", i)
 	}
+	printing(true)
 
 	fmt.Printf("%v\n", empty_spaces())
 }
