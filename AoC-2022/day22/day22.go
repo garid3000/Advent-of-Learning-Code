@@ -24,6 +24,99 @@ var (
 	pos  = Position{}
 )
 
+func part2_advance_1(){
+	thisFace := face_identifier()
+	dir := pos.direction % 4
+	newPos := Position{}
+	switch (dir) {
+	case 0:
+		if (grid[pos.y-1][pos.x] == '.') {
+			pos.y = pos.y - 1
+		} else if  grid[pos.y-1][pos.x] == ',' {
+			switch (thisFace) {
+			case 1:
+				newPos = Position{y: pos.x+100, x: 1,         direction: 1}
+			case 2:
+				newPos = Position{y: 200,       x: pos.x-100, direction: 0}
+			case 5:
+				newPos = Position{y: pos.x+50,  x:51,         direction: 1}
+			default:
+				fmt.Printf("\npanic dir:^ , face:%d\n", thisFace)
+				panic(13)
+			}
+			if grid[newPos.y][newPos.x] == '.' {
+				pos = newPos
+			}
+		}
+	case 1, -3:
+		if (grid[pos.y][pos.x+1] == '.') {
+			pos.x = pos.x + 1
+		} else if  grid[pos.y][pos.x+1] == ',' {
+			switch (thisFace) {
+			case 2:
+				newPos = Position{y:151-pos.y,    x:pos.x-50,    direction: 3}
+			case 3:
+				newPos = Position{y:50,           x:pos.y+50,    direction: 0}
+			case 4:
+				newPos = Position{y:151-pos.y,    x:pos.x+50,    direction: 3}
+			case 6:
+				newPos = Position{y:150,          x:pos.y-100,   direction: 0}
+			default:
+				fmt.Printf("\npanic dir:> , face:%d\n", thisFace)
+				panic(13)
+			}
+			if grid[newPos.y][newPos.x] == '.' {
+				pos = newPos
+			}
+		}
+	case 2, -2:
+		if (grid[pos.y+1][pos.x] == '.') {
+			pos.y = pos.y + 1
+		} else if grid[pos.y+1][pos.x] == ',' {
+			switch (thisFace) {
+			case 2:
+				newPos = Position{y:pos.x-50,     x:100,         direction: 3}
+			case 4:
+				newPos = Position{y:pos.x+100,    x:50,          direction: 3}
+			case 6:
+				newPos = Position{y:1,            x:pos.x+100,   direction: 2}
+			default:
+				fmt.Printf("\npanic dir:v , face:%d\n", thisFace)
+				panic(13)
+			}
+
+			if grid[newPos.y][newPos.x] == '.' {
+				pos = newPos
+			}
+		}
+	case 3, -1:
+		if (grid[pos.y][pos.x-1] == '.') {
+			pos.x = pos.x - 1
+		} else if  grid[pos.y][pos.x-1] == ',' {
+			switch (thisFace) {
+			case 1:
+				newPos = Position{y:151-pos.y,     x:1,         direction: 1}
+			case 3:
+				newPos = Position{y:101,           x:pos.y-50,  direction: 2}
+			case 5:
+				newPos = Position{y:151-pos.y,     x:51,        direction: 1}
+			case 6:
+				newPos = Position{y:1,            x:pos.y-100,  direction: 2}
+			default:
+				fmt.Printf("\npanic dir:< , face:%d\n", thisFace)
+				panic(13)
+			}
+
+			if grid[newPos.y][newPos.x] == '.' {
+				pos = newPos
+			}
+		}
+	default:
+		panic(13)
+	}
+
+}
+
 func advance_1(){
 	dir := pos.direction % 4
 	if dir == 0 {                              //up
@@ -171,15 +264,19 @@ func set_initial_position()(int, int) {
 	panic(2)
 }
 
-func execute_a_cmd(cmd_str string, ith_cmd int){
+func execute_a_cmd(cmd_str string, ith_cmd int, part1or2 int){
 	fmt.Printf("\033[1;0H")
 	fmt.Printf("executing %s\t\t%d of %d    ", cmd_str, ith_cmd, len(cmds))
 
 	val, err := strconv.Atoi(cmd_str)
 	if err == nil { //it's advance type command
 		for i:=0; i<val; i++ {
-			advance_1()
-			// print_around_pos(40)
+			if part1or2 == 1 {
+				advance_1()
+			} else if part1or2 == 2{
+				part2_advance_1()
+			}
+			// print_around_pos(60)
 			// time.Sleep(time.Millisecond * 1)
 		}
 	} else { // it's rotate type command
@@ -193,9 +290,24 @@ func execute_a_cmd(cmd_str string, ith_cmd int){
 	}
 
 
-	print_around_pos(40)
+	print_around_pos(60)
     time.Sleep(time.Millisecond)
 
+}
+
+func isit_within(x, m, M int) bool {
+	return m <= x && x <= M
+}
+
+func face_identifier() int {
+	if isit_within(pos.y,  1,   50)  && isit_within(pos.x, 51,  100)  {return 1}
+	if isit_within(pos.y,  1,   50)  && isit_within(pos.x, 101, 150)  {return 2}
+	if isit_within(pos.y,  51,  100) && isit_within(pos.x, 51,  100)  {return 3}
+	if isit_within(pos.y,  101, 150) && isit_within(pos.x, 51,  100)  {return 4}
+	if isit_within(pos.y,  101, 150) && isit_within(pos.x, 1,   50)   {return 5}
+	if isit_within(pos.y,  151, 200) && isit_within(pos.x, 1,   50)   {return 6}
+
+	panic(23)
 }
 
 
@@ -237,7 +349,7 @@ func main() {
 	fmt.Printf("\033[2J")
 	set_initial_position()
 	for i, cmd := range cmds {
-		execute_a_cmd(cmd, i)
+		execute_a_cmd(cmd, i, 2)
 	}
 
 	var facing int
