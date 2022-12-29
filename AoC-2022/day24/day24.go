@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	// "go/format"
 	"io"
 	"os"
 	// "time"
@@ -16,6 +15,7 @@ var (
 	finaly, finalx = 0, 0
 	inity, initx = 0, 0
 	horsize, versize = 0, 0
+	stage = 1  //part 1 or part 2
 )
 
 
@@ -42,7 +42,7 @@ func new_parsing(ithrow int, line string)  {
 			horsize, versize = L-1, ithrow
 
 			// making frames
-			for kk:=0; kk<6; kk++ {
+			for kk:=0; kk<7; kk++ {
 				for i:=0;i<versize;i++{
 					newgrid[kk][i][0] = '#'
 					newgrid[kk][i][horsize] = '#'
@@ -55,7 +55,11 @@ func new_parsing(ithrow int, line string)  {
 			}
 			// making initial position of
 			newgrid[5][inity][initx] = 'o'
+			newgrid[6][inity][initx] = ' '
+			newgrid[4][inity][initx] = ' '
+			newgrid[6][finaly][finalx] = ' '
 			newgrid[5][finaly][finalx] = ' '
+			newgrid[6][finaly][finalx] = ' '
 			newgrid[4][finaly][finalx] = ' '
 		}
 	}
@@ -80,11 +84,11 @@ func printing_newgrid()  {
 	}
 
 
-// 	for ii:=0; ii<=versize; ii++ {
-// 		for jj:=0; jj<=horsize; jj++ {
-// 			fmt.Printf("\033[%d;%dH%c", 3+ 3*(versize+2) + ii, 3+ jj+horsize + 5, newgrid[6][ii][jj])
-// 		}
-// 	}
+	// for ii:=0; ii<=versize; ii++ {
+	// 	for jj:=0; jj<=horsize; jj++ {
+	// 		fmt.Printf("\033[%d;%dH%c", 3+ 2*(versize+2) + ii, 3+ jj+horsize*2 + 10, newgrid[6][ii][jj])
+	// 	}
+	// }
 }
 
 
@@ -173,8 +177,8 @@ func explore(){
 		}
 	}
 
-	printing_newgrid()
-	// time.Sleep(time.Millisecond * 100)
+	// printing_newgrid()
+	// time.Sleep(time.Millisecond * 10)
 
 	// populate future grid (i.e. calc which cell elves can move into)
 	for ii:=0; ii<versize+1; ii++{ 
@@ -186,26 +190,69 @@ func explore(){
 				if newgrid[4][ii+1][jj] == ' ' {newgrid[6][ii+1][jj] = 'o'}
 				if newgrid[4][ii][jj-1] == ' ' {newgrid[6][ii][jj-1] = 'o'}
 				if newgrid[4][ii][jj+1] == ' ' {newgrid[6][ii][jj+1] = 'o'}
-				if newgrid[4][ii][jj]   == ' ' {newgrid[6][ii][jj] = 'o'  }
-
-				if abs(finaly-ii) + abs(finalx-jj) == 1 {
-					panic(1)
-				}
+				if newgrid[4][ii][jj]   == ' ' {newgrid[6][ii][jj]   = 'o'}
 			}
 		}
 	}
 
-	printing_newgrid()
-	// time.Sleep(time.Millisecond * 100)
+	// printing_newgrid()
+	// time.Sleep(time.Millisecond * 10)
 
 	// move into those cells calculated last step
-	for ii:=1; ii<versize; ii++{  // here
-		for jj:=1; jj<horsize; jj++ {
+	//////////////////////////////////////////////////////////
+	// for ii:=1; ii<versize+1;ii++{  // here			    //
+	// 	for jj:=1; jj<horsize; jj++ {					    //
+	// 		newgrid[5][ii][jj] = newgrid[6][ii][jj]		    //
+	// 		if ii != versize{							    //
+	// 			newgrid[6][ii][jj] = ' '				    //
+	// 		}else if (ii != finaly && jj != finalx) {	    //
+	// 			newgrid[6][ii][jj] = '#'				    //
+	// 		}											    //
+	// 	}												    //
+	// }												    //
+	//////////////////////////////////////////////////////////
+
+
+	for ii:=1; ii<versize; ii++ {
+		for jj:=1; jj<horsize; jj++{
 			newgrid[5][ii][jj] = newgrid[6][ii][jj]
 			newgrid[6][ii][jj] = ' '
 		}
+		newgrid[5][inity][initx] = newgrid[6][inity][initx]
+		newgrid[5][finaly][finalx] = newgrid[6][finaly][finalx]
+	}
+}
+
+
+func check_stage1_or_2(){
+	if newgrid[5][finaly][finalx] == 'o' && stage == 1{
+		stage++;
+
+		for ii:=1; ii<versize;ii++{  
+			for jj:=1; jj<horsize; jj++ {
+				newgrid[5][ii][jj] = ' '
+			}
+		}
+		newgrid[5][inity][initx] = ' '
+		newgrid[6][inity][initx] = ' '
 	}
 
+	if newgrid[5][inity][initx] == 'o' && stage == 2{
+		// panic(2)
+		stage++;
+
+		for ii:=1; ii<versize;ii++{  
+			for jj:=1; jj<horsize; jj++ {
+				newgrid[5][ii][jj] = ' '
+			}
+		}
+		newgrid[5][finaly][finalx] = ' '
+		newgrid[6][finaly][finalx] = ' '
+	}
+
+	if newgrid[5][finaly][finalx] == 'o' && stage == 3{
+		panic(3)
+	}
 }
 
 
@@ -217,8 +264,11 @@ func oneround(){
 	calc_empty_grid()
 	explore()
 
+	// printing_newgrid()
+	check_stage1_or_2()
+
 	printing_newgrid()
-	// time.Sleep(time.Millisecond * 5)
+	// time.Sleep(time.Millisecond * 10)
 	round++
 }
 
