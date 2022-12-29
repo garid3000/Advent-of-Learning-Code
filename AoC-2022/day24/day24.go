@@ -3,215 +3,233 @@ package main
 import (
 	"bufio"
 	"fmt"
+	// "go/format"
 	"io"
 	"os"
-	"time"
+	// "time"
 )
 
-type explored_cell struct {
-	y, x int;
-	arived_at int;
-	available bool;
-}
-
-type blizzard struct {
-	y, x int;
-	dir byte;
-	//up 0, right 1, down 2, left 3
-}
 
 var (
-	round = 0 
-	grid = [30][125] byte{}
-	blizzards = make([]blizzard, 0, 3750)
-	num_blizzard = 0
-	explored_cells = make([]explored_cell, 0, 3750)
+	round = 1
+	newgrid = [7][30][125] byte {};
 	finaly, finalx = 0, 0
 	inity, initx = 0, 0
+	horsize, versize = 0, 0
 )
 
-func print_full_grid() {
-	for ii:=0; ii<30; ii++{
-		for jj:=0; jj<125; jj++{
-			fmt.Printf("%c", grid[ii][jj])
-		}
-		fmt.Println()
-	}
-}
 
-
-func parse_line(irow int, line string){
+// new_parsing ...
+func new_parsing(ithrow int, line string)  {
 	for j,L:=0,len(line); j<L; j++ {
-		grid[irow][j] = line[j]
-		if '^'  == line[j] || '>'  == line[j] || 'v'  == line[j] || '<'  == line[j] {
-			blizzards = append(blizzards, blizzard{y:irow, x:j, dir:line[j]})
-		} else if irow == 0 && '.' == line[j] {
-			inity, initx = irow, j
-		} else if '.' == line[j] {
-			finaly, finalx = irow, j
+		switch line[j] {
+		case '^':
+			newgrid[0][ithrow][j] = '^'
+		case '>':
+			newgrid[1][ithrow][j] = '>'
+		case 'v':
+			newgrid[2][ithrow][j] = 'v'
+		case '<':
+			newgrid[3][ithrow][j] = '<'
+		default:
+			;
+		}
+
+		if ithrow == 0 && '.' == line[j] {
+			inity, initx = ithrow, j
+		} else if '.' == line[j]  && line[2] == '#' && line[3] == '#'{ // this should be the last line
+			finaly, finalx = ithrow, j
+			horsize, versize = L-1, ithrow
+
+			// making frames
+			for kk:=0; kk<6; kk++ {
+				for i:=0;i<versize;i++{
+					newgrid[kk][i][0] = '#'
+					newgrid[kk][i][horsize] = '#'
+				}
+				
+				for j:=0;j<horsize;j++{
+					newgrid[kk][0][j] = '#'
+					newgrid[kk][versize][j] = '#'
+				}
+			}
+			// making initial position of
+			newgrid[5][inity][initx] = 'o'
+			newgrid[5][finaly][finalx] = ' '
+			newgrid[4][finaly][finalx] = ' '
+		}
+	}
+}
+
+// printing_newgrid ...
+func printing_newgrid()  {
+	// fmt.Printf("\033[2J");
+
+	fmt.Printf("\033[%d;%dH Round:\t%d", 0, 0, round)
+	for kk:=0; kk<6; kk+=2 {
+		for ii:=0; ii<=versize; ii++ {
+			for jj:=0; jj<=horsize; jj++ {
+				// fmt.Printf("%c", newgrid[kk][ii][jj])
+				fmt.Printf("\033[%d;%dH%c", 3 + kk/2*(versize+2) + ii, 3 + jj,     newgrid[kk][ii][jj])
+			}
+			for jj:=0; jj<=horsize; jj++ {
+				// fmt.Printf("%c", newgrid[kk+1][ii][jj])
+				fmt.Printf("\033[%d;%dH%c", 3+ kk/2*(versize+2) + ii, 3+ jj+horsize + 5, newgrid[kk+1][ii][jj])
+			}
+		}
+	}
+
+
+// 	for ii:=0; ii<=versize; ii++ {
+// 		for jj:=0; jj<=horsize; jj++ {
+// 			fmt.Printf("\033[%d;%dH%c", 3+ 3*(versize+2) + ii, 3+ jj+horsize + 5, newgrid[6][ii][jj])
+// 		}
+// 	}
+}
+
+
+
+func moveblizzard_up()  { //^
+	tmp := make([]byte, horsize, horsize)
+	for j:=0;j<horsize; j++{tmp[j] = newgrid[0][1][j]}
+
+	for ithrow:=1; ithrow<versize-1; ithrow++{
+		for j:=0;j<horsize; j++{
+			newgrid[0][ithrow][j] = newgrid[0][ithrow+1][j]
+		}
+	}
+	for j:=0;j<horsize; j++{newgrid[0][versize-1][j] = tmp[j]}
+}
+
+
+
+func moveblizzard_down()  { // V
+	tmp := make([]byte, horsize, horsize)
+	for j:=0;j<horsize; j++{tmp[j] = newgrid[2][versize-1][j]}
+
+	for ithrow:=versize-1; ithrow>1; ithrow--{
+		for j:=0;j<horsize; j++{
+			newgrid[2][ithrow][j] = newgrid[2][ithrow-1][j]
+		}
+	}
+	for j:=0;j<horsize; j++{newgrid[2][1][j] = tmp[j]}
+}
+
+func moveblizzard_left()  { //<
+	tmp := make([]byte, versize, versize)
+	for i:=0;i<versize; i++{
+		tmp[i] = newgrid[3][i][1] // remembers left most column
+	}
+	for jthcol:=1; jthcol<horsize-1; jthcol++{ // set jth column with jthcol+1
+		for i:=0; i<versize; i++{
+			newgrid[3][i][jthcol] = newgrid[3][i][jthcol+1]  
+		}
+	}
+	for i:=0; i<versize; i++{newgrid[3][i][horsize-1] = tmp[i]}
+}
+
+
+
+func moveblizzard_right()  { //>
+	tmp := make([]byte, versize, versize)
+	for i:=0;i<versize; i++{
+		tmp[i] = newgrid[1][i][horsize-1] // remembers rightmost most column
+	}
+	for jthcol:=horsize-1; jthcol>1; jthcol--{ // set jth column with jthcol+1
+		for i:=0; i<versize; i++{
+			newgrid[1][i][jthcol] = newgrid[1][i][jthcol-1]  
+		}
+	}
+	for i:=0; i<versize; i++{newgrid[1][i][1] = tmp[i]}
+}
+
+func calc_empty_grid(){
+	for ii:=1; ii<versize; ii++{
+		for jj:=1; jj<horsize; jj++ {
+			newgrid[4][ii][jj] = ' '
+			for kk:=0; kk <4; kk++{
+				if newgrid[kk][ii][jj] != ' ' {
+					newgrid[4][ii][jj] = '#'
+				}
+			}
+		}
+	}
+}
+
+// abs ...
+func abs(v int) int {
+	if v > 0 {return v;} else {return -v;}
+}
+
+func explore(){
+	// this should always executed after the calculating empty  (i.e. movealbe) cells
+
+	//step 1 remove positions now has blizards
+	for ii:=1; ii<versize-1; ii++{
+		for jj:=1; jj<horsize-1; jj++ {
+			if newgrid[4][ii][jj] == '#' && newgrid[5][ii][jj] == 'o' {
+				newgrid[5][ii][jj] = '.'
+			}
+		}
+	}
+
+	printing_newgrid()
+	// time.Sleep(time.Millisecond * 100)
+
+	// populate future grid (i.e. calc which cell elves can move into)
+	for ii:=0; ii<versize+1; ii++{ 
+		for jj:=1; jj<horsize; jj++ {
+			if newgrid[5][ii][jj] == 'o' || newgrid[5][ii][jj] == '.'  { // this round
+				if ii > 0{
+				if newgrid[4][ii-1][jj] == ' ' {newgrid[6][ii-1][jj] = 'o'}
+				}
+				if newgrid[4][ii+1][jj] == ' ' {newgrid[6][ii+1][jj] = 'o'}
+				if newgrid[4][ii][jj-1] == ' ' {newgrid[6][ii][jj-1] = 'o'}
+				if newgrid[4][ii][jj+1] == ' ' {newgrid[6][ii][jj+1] = 'o'}
+				if newgrid[4][ii][jj]   == ' ' {newgrid[6][ii][jj] = 'o'  }
+
+				if abs(finaly-ii) + abs(finalx-jj) == 1 {
+					panic(1)
+				}
+			}
+		}
+	}
+
+	printing_newgrid()
+	// time.Sleep(time.Millisecond * 100)
+
+	// move into those cells calculated last step
+	for ii:=1; ii<versize; ii++{  // here
+		for jj:=1; jj<horsize; jj++ {
+			newgrid[5][ii][jj] = newgrid[6][ii][jj]
+			newgrid[6][ii][jj] = ' '
 		}
 	}
 
 }
 
-func run_1_blizzard(ith int) { //run ith blizzards
-	newx, newy := blizzards[ith].x,  blizzards[ith].y
-	switch(blizzards[ith].dir){
-	case '^':
-		if grid[blizzards[ith].y-1][blizzards[ith].x] == '#' {
-			for i:=29; i>0; i-- {
-				if grid[i][blizzards[ith].x] != '#'{
-					newy = i
-					break
-				}
-			}
-		} else {
-			newy = blizzards[ith].y-1;
-		}
-	case '>':
-		if grid[blizzards[ith].y][blizzards[ith].x+1] == '#' {
-			for j:=0; j<125; j++ {
-				if grid[blizzards[ith].y][j] != '#'{
-					newx = j
-					break
-				}
-			}
-		} else {
-			newx = blizzards[ith].x+1;
-		}
 
-		// fmt.Printf("\n %d=newx, %d=old\t\t %c", newx, blizzards[ith], grid[blizzards[ith].y][blizzards[ith].x+1]) 
-	case 'v':
-		if grid[blizzards[ith].y+1][blizzards[ith].x] == '#' {
-			for i:=0; i<30; i++ {
-				if grid[i][blizzards[ith].x] != '#'{
-					newy = i
-					break
-				}
-			}
-		} else {
-			newy = blizzards[ith].y+1;
-		}
-	case '<':
-		if grid[blizzards[ith].y][blizzards[ith].x-1] == '#' {
-			for j:=124; j>0; j-- {
-				if grid[blizzards[ith].y][j] != '#'{
-					newx = j
-					break
-				}
-			}
-		} else {
-			newx = blizzards[ith].x-1;
-		}
-	default:
-		panic(99)
-	}
+func oneround(){
+	moveblizzard_up()
+	moveblizzard_down()
+	moveblizzard_left()
+	moveblizzard_right()
+	calc_empty_grid()
+	explore()
 
-	// fmt.Printf("%v %v %c ---> %v %v\n", blizzards[ith].y, blizzards[ith].x, blizzards[ith].dir, newy, newx)
-	blizzards[ith].x = newx;
-	blizzards[ith].y = newy;
-	//remove availle explored cell at newx newy
-	
-	for _, ecell := range explored_cells{
-		if ecell.x == newx && ecell.y == newy{
-			ecell.available = false
-			// fmt.Printf("removing %v", ecell)
-		}
-	}
-}
-
-func run_1_round() {
-	print_blizzards()
-	// time.Sleep(time.Millisecond * 3000)
-	time.Sleep(time.Millisecond)
-	for i := range blizzards {
-		run_1_blizzard(i)
-	}
-
-	exploring()
+	printing_newgrid()
+	// time.Sleep(time.Millisecond * 5)
 	round++
 }
 
-func currentavailable()int{
-	sum :=0
-	for _, ecell := range explored_cells{
-		if ecell.available{ sum++}
-	}
-	return sum
-}
-
-func print_blizzards() {
-	fmt.Printf("\033[2J");
-	fmt.Printf("\033[%d;%dH\tround:%d, explored %d, avail %d", 0, 0, round, len(explored_cells), currentavailable())
-	for _,b := range blizzards {
-		fmt.Printf("\033[%d;%dH%c", b.y+1, b.x+1, b.dir)
-	}
-
-	for _, ecell := range explored_cells {
-		if ecell.available {
-			fmt.Printf("\033[%d;%dH%c", ecell.y+30, ecell.x+1, '@')
-		} else {
-			fmt.Printf("\033[%d;%dH%c", ecell.y+30, ecell.x+1, '-')
-		}
-	}
-}
-
-
-
-
-func canImove2thiscell(y, x int) bool {
-	if x < 0 || y <0 {return false}
-	for _,b := range blizzards {
-		if b.x == x && b.y == y {
-			return false
-		}
-	}
-	if grid[y][x] == '#' {
-		return false
-	}
-	return true
-}
-
-func visit_or_makeavail_thisCell(_y, _x int) {
-	for _, thiscell := range explored_cells {
-		if thiscell.y == _y && thiscell.x == _x {
-			// i have visited this cell before
-			thiscell.available = true
-			return
-		}
-	}
-	// i haven't visited this cell
-	explored_cells = append(
-		explored_cells,
-		explored_cell{
-			y: _y,
-			x: _x,
-			arived_at: round,
-			available: true,
-		},
-	) 
-
-	if _y == finaly && _x == finalx {
-		for ;; {
-			fmt.Printf("%v\n", round + 2)
-		}
-	}
-}
-
-func exploring(){
-	for _, ecell := range explored_cells {
-		if ecell.available {
-			if canImove2thiscell(ecell.y-1, ecell.x  ){ visit_or_makeavail_thisCell(ecell.y-1, ecell.x  )}
-			if canImove2thiscell(ecell.y+1, ecell.x  ){ visit_or_makeavail_thisCell(ecell.y+1, ecell.x  )}
-			if canImove2thiscell(ecell.y  , ecell.x-1){ visit_or_makeavail_thisCell(ecell.y  , ecell.x-1)}
-			if canImove2thiscell(ecell.y  , ecell.x+1){ visit_or_makeavail_thisCell(ecell.y  , ecell.x+1)}
-		}
-	}
-}
-
-
 func main() {
-	for ii:=0; ii<30; ii++{for jj:=0; jj<125; jj++{grid[ii][jj] = '#'}}
+	for kk:=0; kk<7; kk++ {
+		for ii:=0; ii<30; ii++{
+			for jj:=0; jj<125; jj++{
+				newgrid[kk][ii][jj] = ' '
+			}
+		}
+	}
 	fmt.Printf("AoC2022 day24\n")
 	fname := "/home/garid/Documents/advent/AoC-2022/day24/input.txt" ;
 	// fname := "/home/garid/Documents/advent/AoC-2022/day24/test"
@@ -231,28 +249,17 @@ func main() {
 		}
 		line = line[:len(line)-1]
 		fmt.Printf("%d\t%v\n", i, line )
-		parse_line(i, line)
+		new_parsing(i, line)
 	}
-	num_blizzard = len(blizzards)
-	print_full_grid()
-	// fmt.Printf("len of blizzards:%v\n", blizzards)
-	fmt.Printf("len of blizzards:%v\n", len(blizzards))
-	fmt.Printf("journey starts at: %v, %v\n", inity, initx)
-	fmt.Printf("journey ends   at: %v, %v\n", finaly, finalx)
+	fmt.Printf("%v %v\n", horsize, versize)
 
-	explored_cells = append(
-		explored_cells,
-		explored_cell{
-			y:inity,
-			x:initx,
-			arived_at: 0,
-			available: true,
-		},
-	)
+	fmt.Printf("\033[2J");
 
 
-	for i:=0; i<1000; i++ {
-		run_1_round()
+	printing_newgrid()
+	// time.Sleep(time.Millisecond * 1000)
+	for ;;{
+		oneround()
+		// time.Sleep(time.Millisecond * 100)
 	}
-
 }
