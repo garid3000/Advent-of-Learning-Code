@@ -1,31 +1,31 @@
 package main
 
 import (
-"bufio"
-"fmt"
-"io"
-//"log"
-"os"
-"strings"
+	"bufio"
+	"fmt"
+	"io"
+	// "log"
+	"os"
+	"strings"
 )
 
 type Valve struct {
-name string;
-rate int;
-tunnells []string;
-//state bool;
+	id       int;
+	name     string
+	rate     int
+	tunnells []string
+	// state bool;
 }
 
-
 var (
-valves = make([]Valve, 0, 100);
-current_room = "AA"
-max_released = 0
-max_released_steps = ""
+	valves             = make([]Valve, 0, 100)
+	current_room       = "AA"
+	max_released       = 0
+	max_released_steps = ""
 )
 
 func room_label2index(label string) int {
-	for i,ith_room := range valves {
+	for i, ith_room := range valves {
 		if ith_room.name == label {
 			return i
 		}
@@ -34,17 +34,18 @@ func room_label2index(label string) int {
 	panic(3)
 }
 
-
-func line_parser(line string){
+func line_parser(line string) {
 	// example "Valve GL has flow rate=0; tunnels lead to valves AF, CQ"
 	lineparts := strings.Split(line, ";")
-	if len(lineparts) != 2 {panic(1)}
+	if len(lineparts) != 2 {
+		panic(1)
+	}
 	//first part
 	var valve_id string
-	var valve_rate int;
+	var valve_rate int
 	fmt.Sscanf(lineparts[0],
 		"Valve %s has flow rate=%d",
-		&valve_id, &valve_rate);
+		&valve_id, &valve_rate)
 
 	//second parts
 	this_valve_leads_to := strings.Split(lineparts[1], ", ")
@@ -56,9 +57,9 @@ func line_parser(line string){
 	//fmt.Printf("%v\t%v\t%v\n", valve_id, valve_rate, lineparts)
 	valves = append(valves,
 		Valve{
-			name:valve_id,
-			rate:valve_rate,
-			tunnells:this_valve_leads_to,
+			name:     valve_id,
+			rate:     valve_rate,
+			tunnells: this_valve_leads_to,
 			//state:false,
 		},
 	)
@@ -66,7 +67,7 @@ func line_parser(line string){
 
 func sum_flow_rate(paralel_universe_valve_states []bool) int {
 	sum := 0
-	for i,ith_valve := range valves {
+	for i, ith_valve := range valves {
 		if paralel_universe_valve_states[i] {
 			sum += ith_valve.rate
 		}
@@ -74,7 +75,7 @@ func sum_flow_rate(paralel_universe_valve_states []bool) int {
 	return sum
 }
 
-func note_max_release_pressure(pu_released_press int, pu_steps string){
+func note_max_release_pressure(pu_released_press int, pu_steps string) {
 	if pu_released_press > max_released {
 		max_released = pu_released_press
 		max_released_steps = pu_steps
@@ -84,26 +85,24 @@ func note_max_release_pressure(pu_released_press int, pu_steps string){
 func is_all_visited(pu_valve_states []bool) bool {
 	tmp := true
 	for _, ith_state := range pu_valve_states {
-		tmp = ith_state  && tmp
+		tmp = ith_state && tmp
 	}
 	return tmp
 }
 
-
-func explore(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_released_press int, pu_steps_leads_here string)  {
+func explore(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_released_press int, pu_steps_leads_here string) {
 	//calc flow rate from previous state
 	pu_cur_released_press += sum_flow_rate(pu_valve_states)
 	if i_thmin == 30 {
 		note_max_release_pressure(pu_cur_released_press, pu_steps_leads_here)
 		//fmt.Printf("%v\n\n", pu_steps_leads_here)
-		return 
+		return
 	}
 	//test
 	if is_all_visited(pu_valve_states) {
-		return 
+		return
 	}
 
-	
 	//not yet: -> go to the other rooms OR open this valve(if not openned yet)
 	curRoomIndex := room_label2index(pu_cur_room)
 	if pu_valve_states[curRoomIndex] == false { // not opened yet
@@ -111,20 +110,20 @@ func explore(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_rel
 			//clone this parellel universe
 			//new_pu_valve_states := pu_valve_states //other variables are same, excepts the time
 			new_pu_valve_states := make([]bool, len(valves)) //other variables are same, excepts the time
-			for ith,v := range pu_valve_states {
+			for ith, v := range pu_valve_states {
 				new_pu_valve_states[ith] = v
 			}
 			new_pu_valve_states[curRoomIndex] = true
 			new_pu_steps_leads_here := fmt.Sprintf("%s%d open %s released %d\n",
 				pu_steps_leads_here, i_thmin, pu_cur_room, pu_cur_released_press)
-			
+
 			//explore the new parallel universe
 			explore(i_thmin+1, new_pu_valve_states, pu_cur_room, pu_cur_released_press, new_pu_steps_leads_here)
 			//println("opening", pu_cur_room, new_pu_steps_leads_here)
 		}
 	}
 
-	for _,ith_room_that_leadsfromhere := range valves[curRoomIndex].tunnells {
+	for _, ith_room_that_leadsfromhere := range valves[curRoomIndex].tunnells {
 		//clone this universe
 		//new_pu_valve_states := pu_valve_states //other variables are same, excepts the time
 		new_pu_steps_leads_here := fmt.Sprintf("%s%d move %s->%s released %d\t%v\n",
@@ -135,21 +134,20 @@ func explore(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_rel
 	}
 }
 
-func explore_nostep_log(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_released_press int)  {
+func explore_nostep_log(i_thmin int, pu_valve_states []bool, pu_cur_room string, pu_cur_released_press int) {
 	//calc flow rate from previous state
 	pu_cur_released_press += sum_flow_rate(pu_valve_states)
 	if i_thmin == 30 {
 		note_max_release_pressure(pu_cur_released_press, "none")
 		//fmt.Printf("%v\n\n", pu_steps_leads_here)
-		return 
+		return
 	}
 	//test
 	if is_all_visited(pu_valve_states) {
 		note_max_release_pressure(pu_cur_released_press, "none")
-		return 
+		return
 	}
 
-	
 	//not yet: -> go to the other rooms OR open this valve(if not openned yet)
 	curRoomIndex := room_label2index(pu_cur_room)
 	if pu_valve_states[curRoomIndex] == false { // not opened yet
@@ -157,20 +155,20 @@ func explore_nostep_log(i_thmin int, pu_valve_states []bool, pu_cur_room string,
 			//clone this parellel universe
 			//new_pu_valve_states := pu_valve_states //other variables are same, excepts the time
 			new_pu_valve_states := make([]bool, len(valves)) //other variables are same, excepts the time
-			for ith,v := range pu_valve_states {
+			for ith, v := range pu_valve_states {
 				new_pu_valve_states[ith] = v
 			}
 			new_pu_valve_states[curRoomIndex] = true
 			//new_pu_steps_leads_here := fmt.Sprintf("%s%d open %s released %d\n",
 			//	pu_steps_leads_here, i_thmin, pu_cur_room, pu_cur_released_press)
-			
+
 			//explore the new parallel universe
 			explore_nostep_log(i_thmin+1, new_pu_valve_states, pu_cur_room, pu_cur_released_press) //, new_pu_steps_leads_here)
 			//println("opening", pu_cur_room, new_pu_steps_leads_here)
 		}
 	}
 
-	for _,ith_room_that_leadsfromhere := range valves[curRoomIndex].tunnells {
+	for _, ith_room_that_leadsfromhere := range valves[curRoomIndex].tunnells {
 		//clone this universe
 		//new_pu_valve_states := pu_valve_states //other variables are same, excepts the time
 		//new_pu_steps_leads_here := fmt.Sprintf("%s%d move %s->%s released %d\t%v\n",
@@ -181,13 +179,11 @@ func explore_nostep_log(i_thmin int, pu_valve_states []bool, pu_cur_room string,
 	}
 }
 
-
-
 func main() {
 	fmt.Printf("AoC2022 day 16\n")
 
 	//fname := "/home/garid/Documents/advent/AoC-2022/day16/input.txt" ;
-	fname := "/home/garid/Documents/advent/AoC-2022/day16/test"    
+	fname := "/home/garid/Documents/advent/AoC-2022/day16/test"
 
 	file, err := os.Open(fname)
 	if err != nil {
@@ -218,7 +214,6 @@ func main() {
 	// 	0,
 	// 	"beginning\n",
 	// )
-
 
 	explore_nostep_log(
 		1,
