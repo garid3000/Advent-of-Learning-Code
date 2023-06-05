@@ -26,12 +26,18 @@ struct Coord {
     y: i32,
 }
 
-
+#[derive(Debug)]
+struct CoordPart2 {
+    x: i32,
+    y: i32,
+    aim: i32,
+}
 
 fn main() {
     let datafile = test_or_real();
 
     let mut pos = Coord { x: 0, y: 0 };
+    let mut pos_p2 = CoordPart2 { x: 0, y: 0, aim:0 };
 
     for line in fs::read_to_string(datafile).unwrap().lines() {
         //let value: i32 = line.trim().parse().expect("Failed while converting to int");
@@ -54,14 +60,18 @@ fn main() {
                 let value: i32 = s.trim().parse().expect("Failed while converting to int");
                 if dir == 0 {
                     pos.x = pos.x + value;
+                    pos_p2.x = pos_p2.x + value;
+                    pos_p2.y = pos_p2.y + (value*pos_p2.aim);
                 } else if dir == 1 {
                     pos.y = pos.y + value;
+                    pos_p2.aim = pos_p2.aim + (value);
                 } else if dir == 2 {
                     pos.y = pos.y - value;
+                    pos_p2.aim = pos_p2.aim - (value);
                 } else {
                     println!("Dir shouldn't get == {dir}");
                 }
-                print!("pos {:?}", pos);
+                print!("pos {:?} \t p2 {:?}", pos, pos_p2);
             } else {
                 println!("SHouldn't be here");
                 return;
@@ -70,7 +80,12 @@ fn main() {
         println!("");
     }
     println!(
-        "final {:?}, mult = {}", 
+        "final     {:?}, mult = {}", 
         pos, pos.x * pos.y
+        );
+
+    println!(
+        "final p2: {:?}, mult = {}", 
+        pos_p2, pos_p2.x * pos_p2.y
         );
 }
