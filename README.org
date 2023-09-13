@@ -16,11 +16,11 @@ I've only started from 2022 with [[https://go.dev/][Go Language]]. So far so goo
 | day-05 ✓✓ | day-10 ✓✓ | day-15 ✓✓ | day-20 !    | day-25 !    |
 
 ** TODO Year [[https://adventofcode.com/2021][2021]], with [[https://www.rust-lang.org/][Rust Language]] 
-| day-01 ✓✓ | day-06 | day-11 | day-16 | day-21 |
-| day-02      | day-07 | day-12 | day-17 | day-22 |
-| day-03      | day-08 | day-13 | day-18 | day-23 |
-| day-04      | day-09 | day-14 | day-19 | day-24 |
-| day-05      | day-10 | day-15 | day-20 | day-25 |
+| day-01 ✓✓  | day-06 | day-11 | day-16 | day-21 |
+| day-02 ✓✓  | day-07 | day-12 | day-17 | day-22 |
+| day-03  ✓  | day-08 | day-13 | day-18 | day-23 |
+| day-04     | day-09 | day-14 | day-19 | day-24 |
+| day-05     | day-10 | day-15 | day-20 | day-25 |
 
 ** TODO Year [[https://adventofcode.com/2020][2020]], with [[https://nim-lang.org/][Nim Language]] 
 | day-01 ✓✓  | day-06 ✓✓ | day-11 | day-16 | day-21 |
