@@ -1,0 +1,51 @@
+import os
+import std/strutils
+import std/sequtils
+import sugar
+# import std/sets
+
+# must count the argv before use
+if paramCount() != 3:
+  quit("bad num of cmd args\n./day15 1,1,2 true 2020") 
+ 
+var print_mode = (paramStr(2) == "true")
+var numseq = paramStr(1).split(',').map( (x:string) -> int => parseInt(x) )
+var iterMaxNum = parseInt(paramStr(3))
+
+echo numseq, " ", print_mode, " ", iterMaxNum
+## ============================================================================ #
+#var appeared_num_set: set[int16] = {}
+#var appeared_num_last_turn: seq[int16] = @[]
+#var iteration_count = int16(numseq.len()-1)
+#var stupid_actual_vals: seq[int16]
+#
+#for i in 0..<numseq.len()-1:
+#  appeared_num_set.incl( int16(numseq[i]) )
+#  appeared_num_last_turn.add( int16(i+1))
+#
+#  stupid_actual_vals.add( int16(numseq[i]) )
+#
+#
+#echo appeared_num_last_turn, appeared_num_set, iteration_count
+#
+#proc process_val(v: int16):int16 = # returns next number
+#  iteration_count+=1
+#  stupid_actual_vals.add(v)
+#  if v notin appeared_num_set:
+#    appeared_num_set.incl(v)
+#    appeared_num_last_turn.add(iteration_count)
+#    result = 0
+#  else:
+#    var index_of_v = find(appeared_num_set, v)
+#    result = iteration_count - appeared_num_last_turn[index_of_v]
+#    appeared_num_last_turn[index_of_v] = iteration_count
+#
+#var tmp = process_val(int16(numseq[^1]))
+#for i in numseq.len()..<iterMaxNum:
+#  tmp = process_val(tmp)
+#  echo iteration_count, "\t", tmp, "|\t", appeared_num_last_turn,"\t", appeared_num_set, "\t|", stupid_actual_vals
+
+for i in newSeq..iterMaxNum:
+  var lastval = numseq[^1]
+  echo i, "\t|", lastval
+
