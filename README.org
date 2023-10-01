@@ -30,12 +30,12 @@ I try to learn new programming language by solving problems provided from [[http
 | day-19 |      |      |      |
 | day-20 |      |      |      |
 | day-21 |    2 |      |      |
-| day-22 |    2 |      |      |
+| day-22 |    2 |      |    1 |
 | day-23 |    2 |      |      |
 | day-24 |    2 |      |      |
 | day-25 |    1 |      |      |
 |--------+------+------+------|
-|        |   43 |    5 |   36 |
+|        |   43 |    5 |   37 |
 |--------+------+------+------|
 #+TBLFM: @>$2=vsum(@3..@-1)::@>$3=vsum(@3..@-1)::::@>$4=vsum(@3..@-1)
 
