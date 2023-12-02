@@ -11,7 +11,7 @@ I try to learn new programming language by solving problems provided from [[http
 | language | [[https://www.gnu.org/software/emacs/manual/html_node/eintr/][Elisp]] |   [[https://go.dev/][Go]] | [[https://www.rust-lang.org/][Rust]] |  [[https://nim-lang.org/][Nim]] |
 |----------+-------+------+------+------|
 | day-01   | [[file:AoC-2023/day01.org][1]]     |    2 |    2 |    2 |
-| day-02   |       |    2 |    2 |    2 |
+| day-02   | [[file:AoC-2023/day02.org][2]]     |    2 |    2 |    2 |
 | day-03   |       |    2 |    1 |    2 |
 | day-04   |       |    2 |      |    2 |
 | day-05   |       |    2 |      |    2 |
